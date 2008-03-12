@@ -6,8 +6,6 @@ use Moose::Meta::Class;
 use MooseX::Storage;
 use MooseX::Storage::IO::File;
 use MooseX::Storage::Format::JSON;
-use Path::Class;
-use File::Slurp qw(read_file write_file);
 
 subtype 'MXStorageClass'
   => as 'Moose::Meta::Class'
