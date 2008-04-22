@@ -1,7 +1,9 @@
 package MooseX::Storage::Directory::UUID;
-use Moose;
+use Moose::Role;
 use MooseX::Types::UUID qw(UUID);
 use Data::UUID;
+
+with 'MooseX::Storage::Directory::Id';
 
 has uuid => (
     is       => 'ro',
