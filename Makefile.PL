@@ -10,7 +10,6 @@ requires 'MooseX::AttributHelpers';
 requires 'MooseX::Storage';
 requires 'MooseX::Types::Path::Class';
 requires 'MooseX::Types::UUID';
-requires 'Scope::Guard';
 requires 'Storable';
 build_requires 'Directory::Scratch';
 build_requires 'Test::More';

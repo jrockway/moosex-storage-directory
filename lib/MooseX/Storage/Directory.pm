@@ -7,7 +7,6 @@ use MooseX::Storage;
 use MooseX::Storage::IO::File;
 use MooseX::Storage::Format::JSON;
 use MooseX::Storage::Directory::Index;
-use Scope::Guard;
 use Storable qw(lock_nstore lock_retrieve);
 
 subtype 'MXStorageClass'
@@ -40,6 +39,13 @@ sub BUILD {
 sub lookup {
     my ($self, $query) = @_;
     return $self->class->name->load($self->directory->file("$query.json")->stringify);
+}
+
+sub search {
+    my ($self, $key, $value) = @_;
+    my $index = $self->_read_index;
+    my $column_index = $index->get_column_index($key);
+    return map { $self->lookup($_) } $column_index->find($value);
 }
 
 sub store {
@@ -91,7 +97,6 @@ sub _lockfile {
 
 sub _index {
     my ($self, $object) = @_;
-    my $guard = Scope::Guard->new( sub { $self->unlock } );
 
     my $index_file = $self->directory->file('.index');
     my $index = eval { lock_retrieve($index_file) } ||
@@ -99,6 +104,15 @@ sub _index {
     
     $index->add_to_index($object);
     lock_nstore($index, $index_file);
+}
+
+sub _read_index {
+    my ($self, $object) = @_;
+
+    my $index_file = $self->directory->file('.index');
+    my $index = eval { lock_retrieve($index_file) } ||
+      MooseX::Storage::Directory::Index->new;
+    return $index;
 }
 
 1;

@@ -13,7 +13,7 @@ has 'data' => (
 
 sub find {
     my ($self, $key) = @_;
-    $self->find_duplicates($key);
+    return $self->data->find_duplicates($key);
 }
 
 # sub less_than {

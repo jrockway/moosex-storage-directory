@@ -44,4 +44,6 @@ $dir->store( Test->new( id => 2, foo => 'Another file' ) );
 
 my @files = $tmp->ls;
 
-is_deeply [sort @files], [sort ('1.json', '2.json')], 'all files stored ok';
+is_deeply [sort grep { !/.index/ } @files], 
+          [sort ('1.json', '2.json')], 
+  'all files stored ok';
