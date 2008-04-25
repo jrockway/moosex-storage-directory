@@ -97,23 +97,23 @@ sub _lockfile {
 #       unless $pid == $$;
 #     unlink $lock or die "Could not unlink $lock: $!";
 # }
-my $index;
+
 sub _index {
     my ($self, $object) = @_;
     my $index_file = $self->directory->file('.index');
-    $index ||= #eval { lock_retrieve($index_file) } ||
+    my $index ||= eval { lock_retrieve($index_file) } ||
       MooseX::Storage::Directory::Index->new;
     
     $index->add_to_index($object);
-    #lock_nstore($index, $index_file);
+    lock_nstore($index, $index_file);
 }
 
 sub _read_index {
     my ($self, $object) = @_;
 
-    #my $index_file = $self->directory->file('.index');
-    #my $index = eval { lock_retrieve($index_file) } ||
-    #  MooseX::Storage::Directory::Index->new;
+    my $index_file = $self->directory->file('.index');
+    my $index = eval { lock_retrieve($index_file) } ||
+      MooseX::Storage::Directory::Index->new;
     return $index;
 }
 
