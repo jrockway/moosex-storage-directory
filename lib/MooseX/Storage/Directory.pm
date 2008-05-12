@@ -35,8 +35,8 @@ sub BUILD {
 
     confess $self->directory, 'must exist' unless -d $self->directory;
     
-    MooseX::Storage::Format::JSON->meta->apply($self->class);
-    MooseX::Storage::IO::File->meta->apply($self->class);
+    MooseX::Storage::Format::JSON->meta->apply($meta);
+    MooseX::Storage::IO::File->meta->apply($meta);
 }
 
 sub lookup {
