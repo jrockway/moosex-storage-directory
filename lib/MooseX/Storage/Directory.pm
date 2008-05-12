@@ -70,12 +70,12 @@ sub store {
       unless $object->isa($self->class->name);
     $object->store($self->directory->file($object->get_id. '.json')->stringify);
 
-    $self->_index($object);
+    $self->_add_to_index($object);
 
     return $object->get_id;
 }
 
-sub _index {
+sub _add_to_index {
     my ($self, $object) = @_;
     my $index_file = $self->directory->file('.index');
     my $index = eval { lock_retrieve($index_file) } ||
