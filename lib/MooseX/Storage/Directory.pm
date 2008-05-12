@@ -78,7 +78,7 @@ sub store {
 sub _index {
     my ($self, $object) = @_;
     my $index_file = $self->directory->file('.index');
-    my $index ||= eval { lock_retrieve($index_file) } ||
+    my $index = eval { lock_retrieve($index_file) } ||
       MooseX::Storage::Directory::Index->new;
 
     $index->add_to_index($object);
