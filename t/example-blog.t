@@ -63,13 +63,13 @@ sub my_sort {
     return sort { $a->get_id cmp $b->get_id } @_;
 }
 
-my @perl = $dir->search( 'tags' => 'perl' );
+my @perl = $dir->search( { tags => 'perl' } );
 
 is_deeply [my_sort @perl], 
           [my_sort($perl_is_awesome, $catalyst_is_awesome, $catalyst_sucks)],
   'got the perl articles';
 
-my @jrockway = $dir->search( 'author' => 'Jonathan Rockway' );
+my @jrockway = $dir->search( { author => 'Jonathan Rockway' } );
 
 is_deeply [my_sort @jrockway], 
           [my_sort($lisp_is_awesome, $catalyst_is_awesome)],

@@ -45,8 +45,21 @@ sub lookup {
 }
 
 sub search {
-    my ($self, $key, $value) = @_;
+    my ($self, $prototype) = @_;
     my $index = $self->_read_index;
+
+    confess "prototype to search must be a reference, not $prototype"
+      if !ref $prototype;
+    confess "prototype to search must be a HASH reference, not $prototype"
+      if ref $prototype ne 'HASH';
+    
+    # not yet implemented
+    if(scalar keys %$prototype != 1){
+        confess 'Searching on more than one column is not yet implemented.';
+    }
+    
+    my ($key, $value) = %$prototype;
+    
     my $column_index = $index->get_column_index($key);
     return map { $self->lookup($_) } $column_index->find($value);
 }
@@ -67,7 +80,7 @@ sub _index {
     my $index_file = $self->directory->file('.index');
     my $index ||= eval { lock_retrieve($index_file) } ||
       MooseX::Storage::Directory::Index->new;
-    
+
     $index->add_to_index($object);
     lock_nstore($index, $index_file);
 }
@@ -87,4 +100,4 @@ __END__
 
 =head1 NAME
 
-MooseX::Storage::Directory - 
+MooseX::Storage::Directory -

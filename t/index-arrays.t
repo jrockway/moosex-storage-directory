@@ -29,12 +29,12 @@ my $baz = Test->new( id => 3, foo => [qw/foo bar baz !yay/] );
 
 $dir->store($_) for ($foo, $bar, $baz);
 
-my @foos = sort map { $_->get_id } $dir->search( foo => 'foo' );
+my @foos = sort map { $_->get_id } $dir->search( { foo => 'foo' } );
 is_deeply \@foos, [1, 3];
 
-my @yays = sort map { $_->get_id } $dir->search( foo => 'yay' );
+my @yays = sort map { $_->get_id } $dir->search( { foo => 'yay' } );
 is_deeply \@yays, [1, 2];
 
-my @twos = sort map { $_->get_id } $dir->search( id => 2 );
+my @twos = sort map { $_->get_id } $dir->search( { id => 2 } );
 is_deeply \@twos, [2];
 

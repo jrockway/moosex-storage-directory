@@ -31,6 +31,6 @@ ok $dir, 'created directory';
   ok $tmp->exists('1.json'), 'created 1.json ok';
   ok $tmp->exists('.index'), 'created index ok';
   
-  my $foo2 = [$dir->search( foo => 'Hello' )]->[0];
+  my $foo2 = [$dir->search( { foo => 'Hello' } )]->[0];
   is $foo2->{id}, 1;
 }
