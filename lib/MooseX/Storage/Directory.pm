@@ -75,23 +75,23 @@ sub store {
     return $object->get_id;
 }
 
-sub _add_to_index {
-    my ($self, $object) = @_;
-    my $index_file = $self->directory->file('.index');
-    my $index = eval { lock_retrieve($index_file) } ||
-      MooseX::Storage::Directory::Index->new;
-
-    $index->add_to_index($object);
-    lock_nstore($index, $index_file);
+sub _index_file {
+    my $self = shift;
+    return $self->directory->file('.index');
 }
 
 sub _read_index {
-    my ($self, $object) = @_;
-
-    my $index_file = $self->directory->file('.index');
-    my $index = eval { lock_retrieve($index_file) } ||
+    my $self = shift;
+    my $index = eval { lock_retrieve($self->_index_file) } ||
       MooseX::Storage::Directory::Index->new;
     return $index;
+}
+
+sub _add_to_index {
+    my ($self, $object) = @_;
+    my $index = $self->_read_index;
+    $index->add_to_index($object);
+    lock_nstore($index, $self->_index_file);
 }
 
 1;
