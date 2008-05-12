@@ -62,10 +62,10 @@ sub store {
     return $object->get_id;
 }
 
-sub _lockfile {
-    my ($self) = @_;
-    return $self->directory->file('lock');
-}
+# sub _lockfile {
+#     my ($self) = @_;
+#     return $self->directory->file('lock');
+# }
 
 # sub lock {
 #     my ($self) = @_;
