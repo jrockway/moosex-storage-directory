@@ -12,6 +12,7 @@ requires 'MooseX::Types::Path::Class';
 requires 'MooseX::Types::UUID';
 requires 'Storable';
 build_requires 'Directory::Scratch';
+build_requires 'Test::Exception';
 build_requires 'Test::More';
 build_requires 'ok';
 
