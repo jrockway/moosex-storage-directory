@@ -81,25 +81,34 @@ sub _flatten {
     return $self->_flatten1('!', $object->pack);
 }
 
-# this is really bad.  we need to be more careful about escaping.
 sub _flatten1 {
     my ($self, $namespace, $ref) = @_;
 
     return unless $ref;
     given($ref){
         when(!ref){
-            return join '=', $namespace, $ref;
+            return join '=', $namespace, $self->_canonicalize($ref);
         }
         when(reftype $_ eq 'ARRAY'){
             return map { $self->_flatten1("$namespace.[]", $_) } @$ref;
         }
         when(reftype $_ eq 'HASH'){
-            return map { $self->_flatten1("$namespace.{$_}", $ref->{$_}) } keys %$ref;
+            return map {
+                $self->_flatten1(
+                    "$namespace.{". $self->_canonicalize($_). "}",
+                    $ref->{$_}
+                )
+            } keys %$ref;
         }
         default {
             confess 'Cannot flatten objects of type '. reftype $_;
         }
     }
+}
+
+sub _canonicalize {
+    my ($self, $value) = @_;
+    return quotemeta $value;
 }
 
 1;
