@@ -1,6 +1,5 @@
 package MooseX::Storage::Directory::Index;
 use Moose;
-use MooseX::Storage::Directory::Index::Column;
 use MooseX::AttributeHelpers;
 use Scalar::Util qw(reftype);
 use feature ':5.10';
