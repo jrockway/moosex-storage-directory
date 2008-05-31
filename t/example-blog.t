@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 2;
+use Test::More tests => 3;
 use Directory::Scratch;
 use MooseX::Storage::Directory;
 use DateTime;
@@ -63,12 +63,20 @@ sub my_sort {
     return sort { $a->get_id cmp $b->get_id } @_;
 }
 
-my @perl = $dir->search( { tags => 'perl' } );
+# one in an array
+my @perl = $dir->search( { tags => ['perl'] } );
 
-is_deeply [my_sort @perl], 
+is_deeply [my_sort @perl],
           [my_sort($perl_is_awesome, $catalyst_is_awesome, $catalyst_sucks)],
   'got the perl articles';
 
+# two in an array
+my @jrockway_perl = $dir->search( { tags => [qw/jrockway perl/] });
+is_deeply [my_sort @jrockway_perl],
+          [my_sort($catalyst_sucks, $catalyst_is_awesome)],
+  'got articles about me and perl';
+  
+# one scalar
 my @jrockway = $dir->search( { author => 'Jonathan Rockway' } );
 
 is_deeply [my_sort @jrockway], 

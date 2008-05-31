@@ -7,9 +7,8 @@ use MooseX::Storage;
 use MooseX::Storage::IO::File;
 use MooseX::Storage::Format::JSON;
 use MooseX::Storage::Directory::Index;
-use Storable qw(lock_nstore lock_retrieve);
 
-our $VERSION   = '0.00_1';
+our $VERSION   = '0.00_2';
 our $AUTHORITY = 'CPAN:JROCKWAY';
 
 subtype 'MXStorageClass'
@@ -21,6 +20,15 @@ has 'directory' => (
     isa      => Dir,
     required => 1,
     coerce   => 1,
+);
+
+has 'index' => (
+    is      => 'ro',
+    isa     => 'MooseX::Storage::Directory::Index',
+    lazy    => 1,
+    default => sub {
+        MooseX::Storage::Directory::Index->new( directory => shift->directory );
+    },
 );
 
 has 'class' => (
@@ -46,52 +54,19 @@ sub lookup {
 
 sub search {
     my ($self, $prototype) = @_;
-    my $index = $self->_read_index;
-
-    confess "prototype to search must be a reference, not $prototype"
-      if !ref $prototype;
-    confess "prototype to search must be a HASH reference, not $prototype"
-      if ref $prototype ne 'HASH';
-    
-    # not yet implemented
-    if(scalar keys %$prototype != 1){
-        confess 'Searching on more than one column is not yet implemented.';
-    }
-    
-    my ($key, $value) = %$prototype;
-    
-    my $column_index = $index->get_column_index($key);
-    return map { $self->lookup($_) } $column_index->find($value);
+    my @results = $self->index->query_with_prototype($prototype);
+    return map { $self->lookup($_) } @results;
 }
 
 sub store {
     my ($self, $object) = @_;
     confess "The class ($object) is not the correct type"
       unless $object->isa($self->class->name);
+    
     $object->store($self->directory->file($object->get_id. '.json')->stringify);
-
-    $self->_add_to_index($object);
+    $self->index->add_object($object);
 
     return $object->get_id;
-}
-
-sub _index_file {
-    my $self = shift;
-    return $self->directory->file('.index');
-}
-
-sub _read_index {
-    my $self = shift;
-    my $index = eval { lock_retrieve($self->_index_file) } ||
-      MooseX::Storage::Directory::Index->new;
-    return $index;
-}
-
-sub _add_to_index {
-    my ($self, $object) = @_;
-    my $index = $self->_read_index;
-    $index->add_to_index($object);
-    lock_nstore($index, $self->_index_file);
 }
 
 1;

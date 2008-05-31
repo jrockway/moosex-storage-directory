@@ -33,11 +33,10 @@ my $complex = Test->new(
     array => [ 'here', 'is', 'a', { list => [ 'of', 'random', 'crap' ] } ],
 );
 
-TODO: 
-{ local $TODO = 'not implemented';
-  lives_ok {
-      $dir->store( $complex );
-  } 'storing complex works';
-  
-  is eval { [ $dir->search( { hash => 'this' } ) ]->[0]->id }, 1, 'got result';
-}
+lives_ok {
+    $dir->store( $complex );
+} 'storing complex works';
+
+is [ 
+    $dir->search( { hash => { this => { is => { a => { deeply => { nested => 'hash' } } } } } } )
+]->[0]->id, 1, 'got result';
