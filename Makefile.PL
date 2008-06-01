@@ -6,7 +6,7 @@ all_from 'lib/MooseX/Storage/Directory.pm';
 requires 'BerkeleyDB';
 requires 'Data::UUID';
 requires 'Data::Visitor::Callback';
-requires 'Moose';
+requires 'Moose' => '0.48';
 requires 'Moose::Util::TypeConstraints';
 requires 'MooseX::AttributeHelpers';
 requires 'MooseX::Storage';

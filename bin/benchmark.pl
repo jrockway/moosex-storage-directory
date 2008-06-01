@@ -15,9 +15,6 @@ my $dir = Directory::Scratch->new;
 
 { package Class;
   use Moose;
-  our $VERSION = '0.01';  
-  our $AUTHORITY = 'i hate stevan :)';
-
   with 'MooseX::Storage::Directory::Id';
   has 'id'  => (is => 'ro', required => 1, isa => 'Int');
   has 'num' => (is => 'ro', required => 1, isa => 'Int');
