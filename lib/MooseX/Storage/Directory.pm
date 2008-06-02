@@ -47,9 +47,14 @@ sub BUILD {
     MooseX::Storage::IO::File->meta->apply($meta);
 }
 
+sub _record_path {
+    my ($self, $id) = @_;
+    return $self->directory->file("$id.json")->stringify;
+}
+
 sub lookup {
-    my ($self, $query) = @_;
-    return $self->class->name->load($self->directory->file("$query.json")->stringify);
+    my ($self, $id) = @_;
+    return $self->class->name->load($self->_record_path($id));
 }
 
 sub search {
@@ -67,6 +72,12 @@ sub store {
     $self->index->add_object($object);
 
     return $object->get_id;
+}
+
+sub delete {
+    my ($self, $object) = @_;
+    $self->index->delete_object($object);
+    unlink $self->_record_path($object->get_id);
 }
 
 1;
