@@ -63,6 +63,22 @@ sub search {
     return map { $self->lookup($_) } @results;
 }
 
+sub scan {
+    my ($self, $code) = @_;
+
+    opendir my $dh, $self->directory 
+      or die "Failed to open @{[$self->directory]}: $!";
+
+    my @files = grep { -f } map { $self->directory->file($_) } readdir $dh;
+
+    my @matches;
+    foreach my $file (@files){
+        my $obj = $self->class->name->load($file->stringify);
+        push @matches, $obj if $code->($obj);
+    }
+    return @matches;
+}
+
 sub store {
     my ($self, $object) = @_;
     confess "The class ($object) is not the correct type"
