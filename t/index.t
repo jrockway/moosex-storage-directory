@@ -5,18 +5,7 @@ use Test::More tests => 7;
 use Directory::Scratch;
 use MooseX::Storage::Directory;
 use Test::Exception;
-
-{
-    package Test;
-    use Moose;
-    use MooseX::Storage;
-    with 'MooseX::Storage::Directory::Id';
-    
-    has 'id'  => ( is => 'ro', isa => 'Int', required => 1 );
-    has 'foo' => ( is => 'ro', isa => 'Str', required => 1 );
-
-    sub get_id { return shift->id }
-}
+use t::lib::Test;
 
 my $tmp = Directory::Scratch->new;
 
