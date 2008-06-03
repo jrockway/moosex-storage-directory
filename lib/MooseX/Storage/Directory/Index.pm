@@ -14,18 +14,34 @@ has 'directory' => (
     coerce   => 1,
 );
 
+has 'environment' => (
+    is   => 'ro',
+    isa  => 'BerkeleyDB::Env',
+    lazy => 1,
+    default => sub {
+        my $self = shift;
+        my $db = $self->directory->subdir('.index');
+        mkdir $db;
+        return BerkeleyDB::Env->new(
+            -Home  => $db->stringify,
+            # we need all this for transactions
+            -Flags => DB_CREATE | DB_INIT_LOCK | DB_INIT_LOG | 
+                      DB_INIT_TXN | DB_INIT_MPOOL | DB_THREAD,
+        );
+    },
+);
+
 has 'forward_index' => (
     is      => 'ro',
     isa     => 'BerkeleyDB::Btree',
     lazy    => 1,
     default => sub {
         my $self = shift;
-        my $db = $self->directory->file('.index');
         return BerkeleyDB::Btree->new(
-            -Filename => $db->stringify,
-            -Subname  => 'forward_index',
+            -Env      => $self->environment,
+            -Filename => 'forward_index',
             -Property => DB_DUP,
-            -Flags    => DB_CREATE,
+            -Flags    => DB_CREATE | DB_THREAD,
         );
     },
 );
@@ -36,35 +52,37 @@ has 'reverse_index' => (
     lazy    => 1,
     default => sub {
         my $self = shift;
-        my $db = $self->directory->file('.index');
-        return BerkeleyDB::Btree->new(
-            -Filename => $db->stringify,
-            -Subname  => 'reverse_index',
+        BerkeleyDB::Btree->new(
+            -Env      => $self->environment,
+            -Filename => 'reverse_index',
             -Property => DB_DUP,
-            -Flags    => DB_CREATE,
+            -Flags    => DB_CREATE | DB_THREAD,
         );
     },
 );
 
 sub add_object {
     my ($self, $object) = @_;
+
+    my $txn = $self->environment->txn_begin;
     $self->delete_object($object);
     my @flat = $self->_flatten($object);
     $self->_add_forward($_ => $object->get_id) foreach @flat;
     $self->_add_reverse($object->get_id, @flat);
-    $self->forward_index->db_sync;
-    $self->reverse_index->db_sync;
+    $txn->txn_commit;
 }
 
 sub query_with_prototype {
     my ($self, $prototype) = @_;
     my @flat = $self->_flatten1('!', $prototype);
 
+    my $txn = $self->environment->txn_begin;
     # this can be made more efficient
     my %results;
     foreach my $query (@flat){
         $results{$_}++ for $self->_query($query);
     }
+    $txn->txn_commit;
 
     return grep { $results{$_} == @flat } keys %results;
 }
@@ -72,6 +90,8 @@ sub query_with_prototype {
 sub delete_object {
     my ($self, $object) = @_;
     my $id = $object->get_id;
+
+    my $txn = $self->environment->txn_begin;
     my @keys = _get_all_dups($self->reverse_index, $id);
     foreach my $key (@keys){
         my $cursor = $self->forward_index->db_cursor or die $BerkeleyDB::Error;
@@ -81,8 +101,10 @@ sub delete_object {
         while($cursor->c_get($key, $current_id, DB_NEXT_DUP) == 0){
             $cursor->c_del if $current_id eq $id;
         }
+        $cursor->c_close;
     }
     $self->reverse_index->db_del($id);
+    $txn->txn_commit;
 }
 
 # helpers
@@ -113,6 +135,8 @@ sub _get_all_dups {
     while($cursor->c_get($key, $result, DB_NEXT_DUP) == 0){
         push @result, $result;
     }
+
+    $cursor->c_close;
     return @result;    
 }
 
