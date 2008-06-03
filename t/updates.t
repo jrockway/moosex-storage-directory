@@ -1,18 +1,10 @@
 use strict;
 use warnings;
 use Test::More tests => 7;
-
-use Directory::Scratch;
-use MooseX::Storage::Directory;
 use t::lib::Test;
 
-my $tmp = Directory::Scratch->new;
-
-my $dir = MooseX::Storage::Directory->new(
-    directory => qq{$tmp},
-    class     => Test->meta,
-);
-
+my $tmp = tmp;
+my $dir = storage;
 ok $dir, 'created directory';
 
 

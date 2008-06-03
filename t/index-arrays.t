@@ -1,16 +1,9 @@
 use strict;
 use warnings;
 use Test::More tests => 3;
-use Directory::Scratch;
-use MooseX::Storage::Directory;
 use t::lib::Test;
 
-my $tmp = Directory::Scratch->new;
-
-my $dir = MooseX::Storage::Directory->new(
-    directory => qq{$tmp},
-    class     => Test->meta,
-);
+my $dir = storage;
 
 my $foo = Test->new( id => 1, bar => [qw/foo yay/] );
 my $bar = Test->new( id => 2, bar => [qw/bar yay/] );
