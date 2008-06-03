@@ -9,11 +9,11 @@ $dir->store(Test->new( id => 1, foo => 'one' ));
 $dir->store(Test->new( id => 2, foo => 'two' ));
 $dir->store(Test->new( id => 3, foo => 'three' ));
 
-my @results = map { $_->id } $dir->scan(sub { my $obj = shift; length $obj->foo == 3 });
+my @results = map { $_->id } $dir->grep(sub { my $obj = shift; length $obj->foo == 3 });
 is_deeply [sort @results], [1, 2], 'got results';
 
 my @foos;
-$dir->with_each_record(sub { push @foos, $_[0]->foo });
+$dir->scan(sub { push @foos, $_[0]->foo });
 is_deeply [sort @foos], [sort qw/one two three/];
 
 my @all = $dir->all;

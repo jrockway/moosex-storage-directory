@@ -63,7 +63,7 @@ sub search {
     return map { $self->lookup($_) } @results;
 }
 
-sub with_each_record {
+sub scan {
     my ($self, $code) = @_;
 
     opendir my $dh, $self->directory
@@ -81,11 +81,11 @@ sub with_each_record {
     return;
 }
 
-sub scan {
+sub grep {
     my ($self, $code) = @_;
 
     my @results;
-    $self->with_each_record(sub {
+    $self->scan(sub {
         my $obj = shift;
         push @results, $obj if $code->($obj);
     });
@@ -95,7 +95,7 @@ sub scan {
 sub all {
     my ($self) = @_;
     my @results;
-    $self->with_each_record(sub { push @results, $_[0] });
+    $self->scan(sub { push @results, $_[0] });
     return @results;
 }
 
