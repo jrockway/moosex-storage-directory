@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More tests => 2;
 use t::lib::Test;
 
 my $dir = storage;
@@ -12,3 +12,6 @@ $dir->store(Test->new( id => 3, foo => 'three' ));
 my @results = map { $_->id } $dir->scan(sub { my $obj = shift; length $obj->foo == 3 });
 is_deeply [sort @results], [1, 2], 'got results';
 
+my @foos;
+$dir->with_each_record(sub { push @foos, $_[0]->foo });
+is_deeply [sort @foos], [sort qw/one two three/];

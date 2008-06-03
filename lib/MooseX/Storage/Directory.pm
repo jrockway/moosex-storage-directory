@@ -42,7 +42,7 @@ sub BUILD {
     my $meta = $self->class;
 
     confess $self->directory, 'must exist' unless -d $self->directory;
-    
+
     MooseX::Storage::Format::JSON->meta->apply($meta);
     MooseX::Storage::IO::File->meta->apply($meta);
 }
@@ -63,27 +63,40 @@ sub search {
     return map { $self->lookup($_) } @results;
 }
 
-sub scan {
+sub with_each_record {
     my ($self, $code) = @_;
 
-    opendir my $dh, $self->directory 
+    opendir my $dh, $self->directory
       or die "Failed to open @{[$self->directory]}: $!";
 
     my @files = grep { -f } map { $self->directory->file($_) } readdir $dh;
 
-    my @matches;
+    closedir $dh;
+
     foreach my $file (@files){
         my $obj = $self->class->name->load($file->stringify);
-        push @matches, $obj if $code->($obj);
+        $code->($obj);
     }
-    return @matches;
+
+    return;
+}
+
+sub scan {
+    my ($self, $code) = @_;
+
+    my @results;
+    $self->with_each_record(sub {
+        my $obj = shift;
+        push @results, $obj if $code->($obj);
+    });
+    return @results;
 }
 
 sub store {
     my ($self, $object) = @_;
     confess "The class ($object) is not the correct type"
       unless $object->isa($self->class->name);
-    
+
     $object->store($self->directory->file($object->get_id. '.json')->stringify);
     $self->index->add_object($object);
 
