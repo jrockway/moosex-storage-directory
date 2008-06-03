@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 2;
+use Test::More tests => 3;
 use t::lib::Test;
 
 my $dir = storage;
@@ -15,3 +15,8 @@ is_deeply [sort @results], [1, 2], 'got results';
 my @foos;
 $dir->with_each_record(sub { push @foos, $_[0]->foo });
 is_deeply [sort @foos], [sort qw/one two three/];
+
+my @all = $dir->all;
+is_deeply [map { $_->foo } sort { $a->id <=> $b->id } @all],
+          [qw/one two three/];
+

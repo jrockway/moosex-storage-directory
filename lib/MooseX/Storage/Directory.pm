@@ -92,6 +92,13 @@ sub scan {
     return @results;
 }
 
+sub all {
+    my ($self) = @_;
+    my @results;
+    $self->with_each_record(sub { push @results, $_[0] });
+    return @results;
+}
+
 sub store {
     my ($self, $object) = @_;
     confess "The class ($object) is not the correct type"
