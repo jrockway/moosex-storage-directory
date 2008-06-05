@@ -9,6 +9,8 @@ $dir->store(Test->new( id => 1, foo => 'one' ));
 $dir->store(Test->new( id => 2, foo => 'two' ));
 $dir->store(Test->new( id => 3, foo => 'three' ));
 
+tmp()->touch('.gitignore'); # make sure this is ignored
+
 my @results = map { $_->id } $dir->grep(sub { my $obj = shift; length $obj->foo == 3 });
 is_deeply [sort @results], [1, 2], 'got results';
 

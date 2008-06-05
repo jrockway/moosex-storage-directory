@@ -69,8 +69,7 @@ sub scan {
     opendir my $dh, $self->directory
       or die "Failed to open @{[$self->directory]}: $!";
 
-    my @files = grep { -f } map { $self->directory->file($_) } readdir $dh;
-
+    my @files = grep { -f } map { $self->directory->file($_) } grep { !/^[.]/ } readdir $dh;
     closedir $dh;
 
     foreach my $file (@files){
