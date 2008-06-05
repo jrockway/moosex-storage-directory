@@ -3,7 +3,6 @@ use warnings;
 use Test::More tests => 3;
 use Directory::Scratch;
 use MooseX::Storage::Directory;
-use DateTime;
 
 { package Blog::Post;
   use Moose;
