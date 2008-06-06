@@ -2,7 +2,6 @@ package MooseX::Storage::Directory::Index;
 use Moose;
 use MooseX::AttributeHelpers;
 use Scalar::Util qw(reftype);
-use feature ':5.10';
 use Moose::Util::TypeConstraints;
 use BerkeleyDB;
 use MooseX::Types::Path::Class qw(Dir);
@@ -154,25 +153,28 @@ sub _flatten1 {
     my ($self, $namespace, $ref) = @_;
 
     return unless $ref;
-    given($ref){
-        when(!ref){
-            return join '=', $namespace, $self->_canonicalize($ref);
-        }
-        when(reftype $_ eq 'ARRAY'){
+
+    my %dispatch = (
+        ARRAY => sub { 
             return map { $self->_flatten1("$namespace.[]", $_) } @$ref;
-        }
-        when(reftype $_ eq 'HASH'){
+        },
+        HASH => sub {
             return map {
                 $self->_flatten1(
                     "$namespace.{". $self->_canonicalize($_). "}",
                     $ref->{$_}
                 )
             } keys %$ref;
-        }
-        default {
-            confess 'Cannot flatten objects of type '. reftype $_;
-        }
-    }
+        },
+        '' => sub {
+            return join '=', $namespace, $self->_canonicalize($ref);
+        },
+    );
+
+    my $action = $dispatch{reftype($ref) || ''};
+    confess 'Cannot flatten objects of type '. reftype $_ unless $action;
+    
+    return $action->();
 }
 
 sub _canonicalize {
