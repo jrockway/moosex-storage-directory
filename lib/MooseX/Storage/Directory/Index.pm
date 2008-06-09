@@ -95,7 +95,7 @@ sub delete_object {
     foreach my $key (@keys){
         my $cursor = $self->forward_index->db_cursor or die $BerkeleyDB::Error;
         my $current_id;
-        $cursor->c_get($key, $current_id, DB_SET) and die $BerkeleyDB::Error;
+        $cursor->c_get($key, $current_id, DB_SET);# and die $BerkeleyDB::Error;
         $cursor->c_del if $current_id eq $id;
         while($cursor->c_get($key, $current_id, DB_NEXT_DUP) == 0){
             $cursor->c_del if $current_id eq $id;
